@@ -89,11 +89,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     data_source = "Cosmos-Reason1-RL-Dataset/robovqa"
-    train_dataset = datasets.load_dataset('../Cosmos-Reason1-RL-Datasetx10/robovqa', data_files='robovqa_rl_qa_pairs.json')['train']
-    test_dataset = datasets.load_dataset('../Cosmos-Reason1-Benchmark/robovqa', data_files='robovqa_benchmark_qa_pairs.json')['train']
+    train_dataset = datasets.load_dataset('data/Cosmos-Reason1-RL-Dataset/robovqa', data_files='robovqa_rl_qa_pairs.json')['train']
+    test_dataset = datasets.load_dataset('data/Cosmos-Reason1-Benchmark/robovqa', data_files='robovqa_benchmark_qa_pairs.json')['train']
     # train_dataset = datasets.load_dataset('nvidia/Cosmos-Reason1-RL-Dataset', 'robovqa')['rl']
     # test_dataset = datasets.load_dataset('nvidia/Cosmos-Reason1-Benchmark', 'robovqa')['benchmark']
-
 
     user_prompt = "\nAnswer with the option's letter from the given choices directly."
     user_prompt += "\nPlease answer the question in the following format: <think> your reasoning </think> <answer> your answer </answer>."
@@ -103,9 +102,9 @@ if __name__ == "__main__":
         def process_fn(example, idx):
             # video = example.pop('video').split("/")[-1] # 使用pop移除原始字段
             if split == "train":
-                video = os.path.join('../Cosmos-Reason1-RL-Datasetx10/robovqa', example.pop('video'))
+                video = os.path.join('data/Cosmos-Reason1-RL-Dataset/robovqa', example.pop('video'))
             else:
-                video = os.path.join('../Cosmos-Reason1-Benchmark/robovqa', example.pop('video'))
+                video = os.path.join('data/Cosmos-Reason1-Benchmark/robovqa', example.pop('video'))
             qa_pairs = example.pop('qa_pairs')  # 使用pop移除原始字段
             answer = qa_pairs['answer']
 
@@ -142,6 +141,7 @@ if __name__ == "__main__":
     train_dataset = train_dataset.map(function=make_map_fn("train"), with_indices=True, num_proc=8)
     test_dataset = test_dataset.map(function=make_map_fn("test"), with_indices=True, num_proc=8)
 
+    breakpoint()
     local_dir = args.local_dir
     hdfs_dir = args.hdfs_dir
 
