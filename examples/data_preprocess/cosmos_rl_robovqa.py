@@ -103,9 +103,9 @@ if __name__ == "__main__":
         def process_fn(example, idx):
             # video = example.pop('video').split("/")[-1] # 使用pop移除原始字段
             if split == "train":
-                video = os.path.join('data/Cosmos-Reason1-RL-Dataset/robovqa', example.pop('video'))
+                video = os.path.join('../Cosmos-Reason1-RL-Datasetx10/robovqa', example.pop('video'))
             else:
-                video = os.path.join('data/Cosmos-Reason1-Benchmark/robovqa', example.pop('video'))
+                video = os.path.join('../Cosmos-Reason1-Benchmark/robovqa', example.pop('video'))
             qa_pairs = example.pop('qa_pairs')  # 使用pop移除原始字段
             answer = qa_pairs['answer']
 
