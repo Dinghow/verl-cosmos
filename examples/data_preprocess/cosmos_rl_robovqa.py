@@ -17,10 +17,67 @@ Preprocess the RoboVQA dataset to parquet format for video-language understandin
 
 import argparse
 import os
+import shutil
 
 import datasets
 
-from verl.utils.hdfs_io import copy, makedirs
+
+_HDFS_PREFIX = "hdfs://"
+
+def copy(src: str, dst: str, **kwargs) -> bool:
+    r"""Works like shutil.copy() for file, and shutil.copytree for dir, and supports hdfs.
+
+    Copy data and mode bits ("cp src dst"). Return the file's destination.
+    The destination may be a directory.
+    If source and destination are the same file, a SameFileError will be
+    raised.
+
+    Arg:
+        src (str): source file path
+        dst (str): destination file path
+        kwargs: keyword arguments for hdfs copy
+
+    Returns:
+        str: destination file path
+
+    """
+    if os.path.isdir(src):
+        return shutil.copytree(src, dst, **kwargs)
+    else:
+        return shutil.copy(src, dst, **kwargs)
+
+
+def _mkdir(file_path: str) -> bool:
+    """hdfs mkdir"""
+    os.makedirs(file_path, exist_ok=True)
+    return True
+
+def _is_non_local(path: str):
+    return path.startswith(_HDFS_PREFIX)
+
+def makedirs(name, mode=0o777, exist_ok=False, **kwargs) -> None:
+    r"""Works like os.makedirs() but supports hdfs.
+
+    Super-mkdir; create a leaf directory and all intermediate ones.  Works like
+    mkdir, except that any intermediate path segment (not just the rightmost)
+    will be created if it does not exist. If the target directory already
+    exists, raise an OSError if exist_ok is False. Otherwise no exception is
+    raised.  This is recursive.
+
+    Args:
+        name (str): directory to create
+        mode (int): file mode bits
+        exist_ok (bool): if True, do not raise an exception if the directory already exists
+        kwargs: keyword arguments for hdfs
+
+    """
+    if _is_non_local(name):
+        # TODO(haibin.lin):
+        # - handle OSError for hdfs(?)
+        # - support exist_ok for hdfs(?)
+        _mkdir(name, **kwargs)
+    else:
+        os.makedirs(name, mode=mode, exist_ok=exist_ok)
 
 FPS = 1
 
@@ -32,8 +89,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     data_source = "Cosmos-Reason1-RL-Dataset/robovqa"
-    train_dataset = datasets.load_dataset('data/Cosmos-Reason1-RL-Dataset/robovqa', data_files='robovqa_rl_qa_pairs.json')['train']
-    test_dataset = datasets.load_dataset('data/Cosmos-Reason1-Benchmark/robovqa', data_files='robovqa_benchmark_qa_pairs.json')['train']
+    train_dataset = datasets.load_dataset('../Cosmos-Reason1-RL-Datasetx10/robovqa', data_files='robovqa_rl_qa_pairs.json')['train']
+    test_dataset = datasets.load_dataset('../Cosmos-Reason1-Benchmark/robovqa', data_files='robovqa_benchmark_qa_pairs.json')['train']
     # train_dataset = datasets.load_dataset('nvidia/Cosmos-Reason1-RL-Dataset', 'robovqa')['rl']
     # test_dataset = datasets.load_dataset('nvidia/Cosmos-Reason1-Benchmark', 'robovqa')['benchmark']
 
